@@ -1,3 +1,120 @@
+
+# =========================================================================
+    # LAYER 3: RECONCILIATION ENGINE
+    # =========================================================================
+    
+    def reconcile_inventory(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Reconcile inventory levels using the formula:
+        Final Stock = Inventory Level + Units Ordered - Units Sold
+        
+        Handle edge cases:
+        - Negative stock levels
+        - Capacity exceeded
+        - Damaged/expired products
+        """
+        logger.info("=" * 60)
+        logger.info("LAYER 3: RECONCILIATION ENGINE")
+        logger.info("=" * 60)
+        
+        df = df.copy()
+        
+        # Initialize reconciliation columns
+        df['reconciliation_status'] = 'RECONCILED'
+        df['negative_stock_flag'] = False
+        df['capacity_exceeded_flag'] = False
+        
+        # Calculate final stock level
+        # Formula: final_stock = inventory_level + units_ordered - units_sold
+        units_ordered = df.get('Units_Ordered', pd.Series(0, index=df.index))
+        units_sold = df.get('Units_Sold', pd.Series(0, index=df.index))
+        
+        # Handle NaN values
+        units_ordered = units_ordered.fillna(0)
+        units_sold = units_sold.fillna(0)
+        
+        df['final_stock_level'] = df['Inventory_Level'] + units_ordered - units_sold
+        
+        # Flag negative stock (edge case)
+        negative_stock_mask = df['final_stock_level'] < 0
+        df.loc[negative_stock_mask, 'negative_stock_flag'] = True
+        df.loc[negative_stock_mask, 'reconciliation_status'] = 'FLAGGED_NEGATIVE'
+        self.stats['negative_stock_flags'] = negative_stock_mask.sum()
+        logger.info(f"Negative stock flags: {self.stats['negative_stock_flags']}")
+        
+        # Flag capacity exceeded (edge case)
+        max_capacity = self.config['reconciliation']['edge_cases']['exceeded_capacity']['max_capacity']
+        capacity_mask = df['final_stock_level'] > max_capacity
+        df.loc[capacity_mask, 'capacity_exceeded_flag'] = True
+        df.loc[capacity_mask, 'reconciliation_status'] = 'FLAGGED_CAPACITY'
+        self.stats['capacity_exceeded_flags'] = capacity_mask.sum()
+        logger.info(f"Capacity exceeded flags: {self.stats['capacity_exceeded_flags']}")
+        
+        # Calculate additional metrics
+        df['restock_in'] = units_ordered
+        df['restock_out'] = units_sold
+        df['stock_movement'] = units_ordered - units_sold
+        
+        logger.info(f"Reconciliation complete. Total records: {len(df)}")
+        
+        return df
+    
+    # =========================================================================
+    # LAYER 4: CURATED (GOLD) - Final Output
+    # =========================================================================
+    
+    def create_curated_layer(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Create the final curated inventory fact table.
+        This is the single source of truth for downstream analytics.
+        """
+        logger.info("=" * 60)
+        logger.info("LAYER 4: CURATED (GOLD) - Inventory Fact Table")
+        logger.info("=" * 60)
+        
+        # Select and rename columns for final fact table
+        curated_columns = [
+            'Store_ID',
+            'Product_ID',
+            'Date',
+            'Inventory_Level',
+            'Units_Sold',
+            'Units_Ordered',
+            'final_stock_level',
+            'restock_in',
+            'restock_out',
+            'stock_movement',
+            'Price',
+            'Discount',
+            'reconciliation_status',
+            'negative_stock_flag',
+            'capacity_exceeded_flag'
+        ]
+        
+        # Keep only columns that exist
+        available_columns = [col for col in curated_columns if col in df.columns]
+        curated_df = df[available_columns].copy()
+        
+        # Add metadata
+        curated_df['last_updated'] = datetime.now()
+        curated_df['pipeline_version'] = self.config['pipeline']['version']
+        
+        # Save to curated layer
+        curated_path = self.config['output']['curated']['path']
+        os.makedirs(curated_path, exist_ok=True)
+        
+        output_file = f"{curated_path}/inventory_fact.parquet"
+        curated_df.to_parquet(output_file, index=False)
+        logger.info(f"Curated data saved to {output_file}")
+        
+        # Also save as CSV for easy viewing
+        csv_file = f"{curated_path}/inventory_fact.csv"
+        curated_df.to_csv(csv_file, index=False)
+        logger.info(f"Curated data also saved as CSV: {csv_file}")
+        
+        self.curated_data = curated_df
+        return curated_df
+
 # =========================================================================
     # QUARANTINE LAYER - Invalid Records
     # =========================================================================
