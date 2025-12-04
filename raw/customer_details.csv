@@ -1,0 +1,14 @@
+customer_id,customer_name,email,phone,registration_date,customer_tier,total_purchases,total_refunds,account_status
+CUST001,Rahul Sharma,rahul.sharma@email.com,9876543210,2023-01-15,GOLD,45000.00,2500.00,ACTIVE
+CUST002,Priya Patel,priya.patel@email.com,9876543211,2023-02-20,SILVER,28000.00,1200.00,ACTIVE
+CUST003,Amit Kumar,amit.kumar@email.com,9876543212,2023-03-10,BRONZE,12000.00,800.00,ACTIVE
+CUST004,Sneha Reddy,sneha.reddy@email.com,9876543213,2023-04-05,GOLD,52000.00,3100.00,ACTIVE
+CUST005,Vikram Singh,vikram.singh@email.com,9876543214,2023-05-12,SILVER,18000.00,950.00,ACTIVE
+CUST006,Ananya Gupta,ananya.gupta@email.com,9876543215,2023-06-18,BRONZE,8500.00,400.00,ACTIVE
+CUST007,Karan Mehta,karan.mehta@email.com,9876543216,2023-07-22,SILVER,22000.00,1500.00,ACTIVE
+CUST008,Deepika Nair,deepika.nair@email.com,9876543217,2023-08-30,GOLD,38000.00,2200.00,ACTIVE
+CUST009,Rajesh Iyer,rajesh.iyer@email.com,9876543218,2023-09-14,BRONZE,9500.00,600.00,ACTIVE
+CUST010,Meera Joshi,meera.joshi@email.com,9876543219,2023-10-25,SILVER,15000.00,750.00,ACTIVE
+CUST011,Suspicious User,suspicious@temp.com,9999999999,2024-01-01,BRONZE,5000.00,4800.00,FLAGGED
+CUST012,Fraud Test,fraud.test@fake.com,8888888888,2024-01-10,BRONZE,3000.00,2900.00,ACTIVE
+

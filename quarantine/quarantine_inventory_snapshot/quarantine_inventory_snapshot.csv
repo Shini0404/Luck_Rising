@@ -1,0 +1,6 @@
+snapshot_id,store_id,product_id,snapshot_date,snapshot_level,max_capacity,damaged_quantity,expired_quantity,validation_status,validation_errors,suggested_product_id,fuzzy_match_score,quarantine_date,source_dataset,error_type
+SNP025,ST002,PROD_001,2024-01-17,180,400,2,1,INVALID,MISMATCHED_PRODUCT_ID; ,PRD001,86.0,2025-12-04 18:03:28.212747,inventory_snapshot,MISMATCHED_PRODUCT
+SNP023,ST003,PRD006,2024-01-17,-50,500,0,0,INVALID,NEGATIVE_STOCK; ,,,2025-12-04 18:03:28.212747,inventory_snapshot,NEGATIVE_STOCK
+SNP022,ST002,PRD001,,450,1000,10,5,INVALID,MISSING_SNAPSHOT_DATE; ,,,2025-12-04 18:03:28.212747,inventory_snapshot,MISSING_FIELD
+SNP021,ST001,,2024-01-17,150,500,0,0,INVALID,MISSING_PRODUCT_ID; ,,,2025-12-04 18:03:28.212747,inventory_snapshot,MISSING_FIELD
+SNP020,,PRD002,2024-01-17,300,800,2,1,INVALID,MISSING_STORE_ID; ,,,2025-12-04 18:03:28.212747,inventory_snapshot,MISSING_FIELD

@@ -1,0 +1,84 @@
+# =============================================================================
+# TASK 2: REAL-TIME SHOPPING BASKET AFFINITY ANALYZER
+# Configuration File
+# =============================================================================
+
+pipeline:
+  name: "basket_affinity_analyzer"
+  version: "1.0"
+  description: "Identify products commonly purchased together and compute association strengths"
+
+# =============================================================================
+# DATA SOURCES
+# =============================================================================
+data_sources:
+  store_sales_header:
+    file_path: "raw/store_sales_header.csv"
+    file_type: "csv"
+    required_columns:
+      - "transaction_id"
+      - "store_id"
+      - "customer_id"
+      - "sale_date"
+      - "total_amount"
+
+  store_sales_line_items:
+    file_path: "raw/store_sales_line_items.csv"
+    file_type: "csv"
+    required_columns:
+      - "line_item_id"
+      - "transaction_id"
+      - "product_id"
+      - "quantity"
+      - "unit_price"
+
+  products:
+    file_path: "raw/products.csv"
+    file_type: "csv"
+    required_columns:
+      - "product_id"
+      - "product_name"
+
+# =============================================================================
+# AFFINITY ANALYSIS SETTINGS
+# =============================================================================
+affinity:
+  # Minimum support threshold (fraction of transactions)
+  min_support: 0.01  # At least 1% of transactions
+  
+  # Minimum confidence threshold
+  min_confidence: 0.1  # At least 10% confidence
+  
+  # Minimum lift threshold
+  min_lift: 1.0  # Lift > 1 means positive association
+  
+  # Number of top affinities to return
+  top_n: 10
+
+# =============================================================================
+# OUTPUT CONFIGURATIONS
+# =============================================================================
+output:
+  raw:
+    path: "raw"
+  
+  staging:
+    path: "staging/task2"
+    transaction_baskets: "staging/task2/transaction_baskets"
+    product_pairs: "staging/task2/product_pairs"
+  
+  curated:
+    path: "curated/task2"
+    affinity_scores: "curated/task2/affinity_scores"
+    top_affinities: "curated/task2/top_affinities"
+    also_save_csv: true
+
+# =============================================================================
+# LOGGING
+# =============================================================================
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-8s | %(message)s"
+  file: "logs/task2_pipeline.log"
+  console: true
+

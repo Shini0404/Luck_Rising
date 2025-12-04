@@ -1,0 +1,7 @@
+store_id,store_name,location,city,region,store_type,capacity_tier
+ST001,FreshMart Downtown,123 Main Street,Mumbai,West,SUPERMARKET,LARGE
+ST002,FreshMart Mall,456 Mall Road,Delhi,North,HYPERMARKET,LARGE
+ST003,FreshMart Express,789 Station Road,Bangalore,South,EXPRESS,MEDIUM
+ST004,FreshMart Central,321 Central Ave,Chennai,South,SUPERMARKET,MEDIUM
+ST005,FreshMart Plus,654 Ring Road,Pune,West,SUPERMARKET,SMALL
+

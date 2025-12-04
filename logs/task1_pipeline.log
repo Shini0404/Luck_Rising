@@ -1,0 +1,248 @@
+2025-12-04 17:59:47,622 | INFO     | InventoryPipeline | **********************************************************************
+2025-12-04 17:59:47,623 | INFO     | InventoryPipeline | STARTING: UNIFIED PRODUCT & INVENTORY DATA HARMONIZATION PIPELINE
+2025-12-04 17:59:47,623 | INFO     | InventoryPipeline | **********************************************************************
+2025-12-04 17:59:47,623 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:47,624 | INFO     | InventoryPipeline | LAYER 1: RAW (BRONZE) - Data Ingestion
+2025-12-04 17:59:47,624 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:47,624 | INFO     | InventoryPipeline | Loading dataset: inventory_snapshot from raw/inventory_snapshot.csv
+2025-12-04 17:59:47,631 | INFO     | InventoryPipeline | Loaded 30 records from inventory_snapshot
+2025-12-04 17:59:47,632 | INFO     | InventoryPipeline | Columns: ['snapshot_id', 'store_id', 'product_id', 'snapshot_date', 'snapshot_level', 'max_capacity', 'damaged_quantity', 'expired_quantity']
+2025-12-04 17:59:47,632 | INFO     | InventoryPipeline | Loading dataset: restock_events from raw/restock_events.csv
+2025-12-04 17:59:47,636 | INFO     | InventoryPipeline | Loaded 28 records from restock_events
+2025-12-04 17:59:47,636 | INFO     | InventoryPipeline | Columns: ['restock_id', 'store_id', 'product_id', 'restock_date', 'incoming_quantity', 'restock_type', 'supplier_id']
+2025-12-04 17:59:47,636 | INFO     | InventoryPipeline | Loading dataset: products from raw/products.csv
+2025-12-04 17:59:47,638 | INFO     | InventoryPipeline | Loaded 10 records from products
+2025-12-04 17:59:47,638 | INFO     | InventoryPipeline | Columns: ['product_id', 'product_name', 'sku', 'category', 'unit_price', 'max_restock_quantity', 'status']
+2025-12-04 17:59:47,638 | INFO     | InventoryPipeline | Loading dataset: stores from raw/stores.csv
+2025-12-04 17:59:47,640 | INFO     | InventoryPipeline | Loaded 5 records from stores
+2025-12-04 17:59:47,640 | INFO     | InventoryPipeline | Columns: ['store_id', 'store_name', 'location', 'city', 'region', 'store_type', 'capacity_tier']
+2025-12-04 17:59:47,901 | INFO     | InventoryPipeline | Raw data saved: raw/inventory_snapshot_raw.parquet
+2025-12-04 17:59:47,905 | INFO     | InventoryPipeline | Raw data saved: raw/restock_events_raw.parquet
+2025-12-04 17:59:47,905 | INFO     | InventoryPipeline | Total inventory snapshots: 30
+2025-12-04 17:59:47,905 | INFO     | InventoryPipeline | Total restock events: 28
+2025-12-04 17:59:47,905 | INFO     | InventoryPipeline | Products in master: 10
+2025-12-04 17:59:47,905 | INFO     | InventoryPipeline | Stores in master: 5
+2025-12-04 17:59:47,905 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:47,906 | INFO     | InventoryPipeline | LAYER 2: STAGING (SILVER) - Validation & Deduplication
+2025-12-04 17:59:47,906 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:47,906 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:47,906 | INFO     | InventoryPipeline | Validating Inventory Snapshots...
+2025-12-04 17:59:47,906 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:47,912 | INFO     | InventoryPipeline |   Missing store_id: 1 records
+2025-12-04 17:59:47,913 | INFO     | InventoryPipeline |   Missing product_id: 1 records
+2025-12-04 17:59:47,915 | INFO     | InventoryPipeline |   Missing snapshot_date: 1 records
+2025-12-04 17:59:47,916 | INFO     | InventoryPipeline |   Missing snapshot_level: 0 records
+2025-12-04 17:59:47,917 | INFO     | InventoryPipeline |   Negative stock: 1 records
+2025-12-04 17:59:47,922 | INFO     | InventoryPipeline |   Mismatched product_id: 1 records
+2025-12-04 17:59:47,923 | INFO     | InventoryPipeline |   Capacity exceeded (warning): 0 records
+2025-12-04 17:59:47,928 | INFO     | InventoryPipeline |   Valid records: 24
+2025-12-04 17:59:47,928 | INFO     | InventoryPipeline |   Invalid records: 5
+2025-12-04 17:59:47,928 | INFO     | InventoryPipeline |   Duplicates removed: 1
+2025-12-04 17:59:47,929 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:47,929 | INFO     | InventoryPipeline | Validating Restock Events...
+2025-12-04 17:59:47,929 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:47,931 | INFO     | InventoryPipeline |   Missing store_id: 1 records
+2025-12-04 17:59:47,932 | INFO     | InventoryPipeline |   Missing product_id: 1 records
+2025-12-04 17:59:47,934 | INFO     | InventoryPipeline |   Missing restock_date: 0 records
+2025-12-04 17:59:47,935 | INFO     | InventoryPipeline |   Missing incoming_quantity: 0 records
+2025-12-04 17:59:47,936 | INFO     | InventoryPipeline |   Invalid quantity: 0 records
+2025-12-04 17:59:47,942 | INFO     | InventoryPipeline |   Exceeded restock max: 3 records
+2025-12-04 17:59:47,944 | INFO     | InventoryPipeline |   Mismatched product_id: 1 records
+2025-12-04 17:59:47,945 | INFO     | InventoryPipeline |   Valid records: 22
+2025-12-04 17:59:47,945 | INFO     | InventoryPipeline |   Invalid records: 6
+2025-12-04 17:59:47,946 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:47,946 | INFO     | InventoryPipeline | Applying Fuzzy Matching for Product ID Correction...
+2025-12-04 17:59:47,946 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:47,947 | INFO     | InventoryPipeline |   Attempting fuzzy match for 1 records in inventory_snapshot
+2025-12-04 17:59:47,989 | INFO     | InventoryPipeline |   Attempting fuzzy match for 1 records in restock_events
+2025-12-04 17:59:47,992 | INFO     | InventoryPipeline |   Fuzzy matches found: 2
+2025-12-04 17:59:47,992 | INFO     | InventoryPipeline |   Unmatched products: 0
+2025-12-04 17:59:47,993 | INFO     | InventoryPipeline |   Validating SKU format with pattern: ^SKU-[A-Z]{3}-[0-9]{3}$
+2025-12-04 17:59:47,993 | INFO     | InventoryPipeline |     inventory_snapshot: 24 non-standard SKUs
+2025-12-04 17:59:47,994 | INFO     | InventoryPipeline |     restock_events: 22 non-standard SKUs
+2025-12-04 17:59:47,994 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:47,994 | INFO     | InventoryPipeline | LAYER 3: RECONCILIATION - Computing Effective Stock Level
+2025-12-04 17:59:47,994 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:47,998 | INFO     | InventoryPipeline |   Aggregated restock events: 22 unique combinations
+2025-12-04 17:59:48,002 | INFO     | InventoryPipeline |   Formula: effective_stock = snapshot + restock - damaged - expired
+2025-12-04 17:59:48,004 | INFO     | InventoryPipeline |   Total reconciled records: 24
+2025-12-04 17:59:48,004 | INFO     | InventoryPipeline |   Average effective stock: 353.12
+2025-12-04 17:59:48,004 | INFO     | InventoryPipeline |   Total stock movement: 1120
+2025-12-04 17:59:48,004 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:48,005 | INFO     | InventoryPipeline | LAYER 4: CURATED (GOLD) - Inventory Fact Table
+2025-12-04 17:59:48,005 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:48,017 | INFO     | InventoryPipeline |   Saved to: curated/inventory_fact/inventory_fact.parquet
+2025-12-04 17:59:48,022 | INFO     | InventoryPipeline |   Also saved as CSV: curated/inventory_fact/inventory_fact.csv
+2025-12-04 17:59:48,022 | INFO     | InventoryPipeline |   Total records in fact table: 24
+2025-12-04 17:59:48,022 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:48,023 | INFO     | InventoryPipeline | QUARANTINE LAYER - Invalid Records for Diagnostics
+2025-12-04 17:59:48,023 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:48,033 | INFO     | InventoryPipeline |   inventory_snapshot: 5 invalid records saved to quarantine/quarantine_inventory_snapshot
+2025-12-04 17:59:48,043 | INFO     | InventoryPipeline |   restock_events: 6 invalid records saved to quarantine/quarantine_restock_events
+2025-12-04 17:59:48,044 | INFO     | InventoryPipeline | Report saved to: curated/pipeline_execution_report.txt
+2025-12-04 17:59:48,045 | INFO     | InventoryPipeline | **********************************************************************
+2025-12-04 17:59:48,045 | INFO     | InventoryPipeline | PIPELINE COMPLETED SUCCESSFULLY!
+2025-12-04 17:59:48,046 | INFO     | InventoryPipeline | **********************************************************************
+2025-12-04 17:59:55,735 | INFO     | InventoryPipeline | **********************************************************************
+2025-12-04 17:59:55,735 | INFO     | InventoryPipeline | STARTING: UNIFIED PRODUCT & INVENTORY DATA HARMONIZATION PIPELINE
+2025-12-04 17:59:55,735 | INFO     | InventoryPipeline | **********************************************************************
+2025-12-04 17:59:55,736 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:55,736 | INFO     | InventoryPipeline | LAYER 1: RAW (BRONZE) - Data Ingestion
+2025-12-04 17:59:55,736 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:55,736 | INFO     | InventoryPipeline | Loading dataset: inventory_snapshot from raw/inventory_snapshot.csv
+2025-12-04 17:59:55,739 | INFO     | InventoryPipeline | Loaded 30 records from inventory_snapshot
+2025-12-04 17:59:55,739 | INFO     | InventoryPipeline | Columns: ['snapshot_id', 'store_id', 'product_id', 'snapshot_date', 'snapshot_level', 'max_capacity', 'damaged_quantity', 'expired_quantity']
+2025-12-04 17:59:55,739 | INFO     | InventoryPipeline | Loading dataset: restock_events from raw/restock_events.csv
+2025-12-04 17:59:55,741 | INFO     | InventoryPipeline | Loaded 28 records from restock_events
+2025-12-04 17:59:55,741 | INFO     | InventoryPipeline | Columns: ['restock_id', 'store_id', 'product_id', 'restock_date', 'incoming_quantity', 'restock_type', 'supplier_id']
+2025-12-04 17:59:55,741 | INFO     | InventoryPipeline | Loading dataset: products from raw/products.csv
+2025-12-04 17:59:55,744 | INFO     | InventoryPipeline | Loaded 10 records from products
+2025-12-04 17:59:55,744 | INFO     | InventoryPipeline | Columns: ['product_id', 'product_name', 'sku', 'category', 'unit_price', 'max_restock_quantity', 'status']
+2025-12-04 17:59:55,744 | INFO     | InventoryPipeline | Loading dataset: stores from raw/stores.csv
+2025-12-04 17:59:55,746 | INFO     | InventoryPipeline | Loaded 5 records from stores
+2025-12-04 17:59:55,746 | INFO     | InventoryPipeline | Columns: ['store_id', 'store_name', 'location', 'city', 'region', 'store_type', 'capacity_tier']
+2025-12-04 17:59:55,773 | INFO     | InventoryPipeline | Raw data saved: raw/inventory_snapshot_raw.parquet
+2025-12-04 17:59:55,777 | INFO     | InventoryPipeline | Raw data saved: raw/restock_events_raw.parquet
+2025-12-04 17:59:55,777 | INFO     | InventoryPipeline | Total inventory snapshots: 30
+2025-12-04 17:59:55,777 | INFO     | InventoryPipeline | Total restock events: 28
+2025-12-04 17:59:55,777 | INFO     | InventoryPipeline | Products in master: 10
+2025-12-04 17:59:55,777 | INFO     | InventoryPipeline | Stores in master: 5
+2025-12-04 17:59:55,777 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:55,777 | INFO     | InventoryPipeline | LAYER 2: STAGING (SILVER) - Validation & Deduplication
+2025-12-04 17:59:55,777 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:55,777 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:55,777 | INFO     | InventoryPipeline | Validating Inventory Snapshots...
+2025-12-04 17:59:55,778 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:55,781 | INFO     | InventoryPipeline |   Missing store_id: 1 records
+2025-12-04 17:59:55,783 | INFO     | InventoryPipeline |   Missing product_id: 1 records
+2025-12-04 17:59:55,784 | INFO     | InventoryPipeline |   Missing snapshot_date: 1 records
+2025-12-04 17:59:55,786 | INFO     | InventoryPipeline |   Missing snapshot_level: 0 records
+2025-12-04 17:59:55,788 | INFO     | InventoryPipeline |   Negative stock: 1 records
+2025-12-04 17:59:55,791 | INFO     | InventoryPipeline |   Mismatched product_id: 1 records
+2025-12-04 17:59:55,794 | INFO     | InventoryPipeline |   Capacity exceeded (warning): 0 records
+2025-12-04 17:59:55,799 | INFO     | InventoryPipeline |   Valid records: 24
+2025-12-04 17:59:55,799 | INFO     | InventoryPipeline |   Invalid records: 5
+2025-12-04 17:59:55,800 | INFO     | InventoryPipeline |   Duplicates removed: 1
+2025-12-04 17:59:55,800 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:55,800 | INFO     | InventoryPipeline | Validating Restock Events...
+2025-12-04 17:59:55,800 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:55,803 | INFO     | InventoryPipeline |   Missing store_id: 1 records
+2025-12-04 17:59:55,805 | INFO     | InventoryPipeline |   Missing product_id: 1 records
+2025-12-04 17:59:55,806 | INFO     | InventoryPipeline |   Missing restock_date: 0 records
+2025-12-04 17:59:55,807 | INFO     | InventoryPipeline |   Missing incoming_quantity: 0 records
+2025-12-04 17:59:55,809 | INFO     | InventoryPipeline |   Invalid quantity: 0 records
+2025-12-04 17:59:55,814 | INFO     | InventoryPipeline |   Exceeded restock max: 3 records
+2025-12-04 17:59:55,816 | INFO     | InventoryPipeline |   Mismatched product_id: 1 records
+2025-12-04 17:59:55,817 | INFO     | InventoryPipeline |   Valid records: 22
+2025-12-04 17:59:55,817 | INFO     | InventoryPipeline |   Invalid records: 6
+2025-12-04 17:59:55,817 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:55,817 | INFO     | InventoryPipeline | Applying Fuzzy Matching for Product ID Correction...
+2025-12-04 17:59:55,818 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 17:59:55,819 | INFO     | InventoryPipeline |   Attempting fuzzy match for 1 records in inventory_snapshot
+2025-12-04 17:59:55,827 | INFO     | InventoryPipeline |   Attempting fuzzy match for 1 records in restock_events
+2025-12-04 17:59:55,831 | INFO     | InventoryPipeline |   Fuzzy matches found: 2
+2025-12-04 17:59:55,831 | INFO     | InventoryPipeline |   Unmatched products: 0
+2025-12-04 17:59:55,831 | INFO     | InventoryPipeline |   Validating SKU format with pattern: ^SKU-[A-Z]{3}-[0-9]{3}$
+2025-12-04 17:59:55,833 | INFO     | InventoryPipeline |     inventory_snapshot: 24 non-standard SKUs
+2025-12-04 17:59:55,833 | INFO     | InventoryPipeline |     restock_events: 22 non-standard SKUs
+2025-12-04 17:59:55,834 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:55,834 | INFO     | InventoryPipeline | LAYER 3: RECONCILIATION - Computing Effective Stock Level
+2025-12-04 17:59:55,834 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:55,838 | INFO     | InventoryPipeline |   Aggregated restock events: 22 unique combinations
+2025-12-04 17:59:55,842 | INFO     | InventoryPipeline |   Formula: effective_stock = snapshot + restock - damaged - expired
+2025-12-04 17:59:55,844 | INFO     | InventoryPipeline |   Total reconciled records: 24
+2025-12-04 17:59:55,845 | INFO     | InventoryPipeline |   Average effective stock: 353.12
+2025-12-04 17:59:55,845 | INFO     | InventoryPipeline |   Total stock movement: 1120
+2025-12-04 17:59:55,845 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:55,845 | INFO     | InventoryPipeline | LAYER 4: CURATED (GOLD) - Inventory Fact Table
+2025-12-04 17:59:55,845 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:55,862 | INFO     | InventoryPipeline |   Saved to: curated/inventory_fact/inventory_fact.parquet
+2025-12-04 17:59:55,869 | INFO     | InventoryPipeline |   Also saved as CSV: curated/inventory_fact/inventory_fact.csv
+2025-12-04 17:59:55,869 | INFO     | InventoryPipeline |   Total records in fact table: 24
+2025-12-04 17:59:55,869 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:55,869 | INFO     | InventoryPipeline | QUARANTINE LAYER - Invalid Records for Diagnostics
+2025-12-04 17:59:55,869 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 17:59:55,879 | INFO     | InventoryPipeline |   inventory_snapshot: 5 invalid records saved to quarantine/quarantine_inventory_snapshot
+2025-12-04 17:59:55,891 | INFO     | InventoryPipeline |   restock_events: 6 invalid records saved to quarantine/quarantine_restock_events
+2025-12-04 17:59:55,892 | INFO     | InventoryPipeline | Report saved to: curated/pipeline_execution_report.txt
+2025-12-04 17:59:55,893 | INFO     | InventoryPipeline | **********************************************************************
+2025-12-04 17:59:55,893 | INFO     | InventoryPipeline | PIPELINE COMPLETED SUCCESSFULLY!
+2025-12-04 17:59:55,893 | INFO     | InventoryPipeline | **********************************************************************
+2025-12-04 18:03:27,965 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 18:03:27,966 | INFO     | InventoryPipeline | LAYER 1: RAW (BRONZE) - Data Ingestion
+2025-12-04 18:03:27,966 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 18:03:27,966 | INFO     | InventoryPipeline | Loading dataset: inventory_snapshot from raw/inventory_snapshot.csv
+2025-12-04 18:03:27,970 | INFO     | InventoryPipeline | Loaded 30 records from inventory_snapshot
+2025-12-04 18:03:27,970 | INFO     | InventoryPipeline | Columns: ['snapshot_id', 'store_id', 'product_id', 'snapshot_date', 'snapshot_level', 'max_capacity', 'damaged_quantity', 'expired_quantity']
+2025-12-04 18:03:27,971 | INFO     | InventoryPipeline | Loading dataset: restock_events from raw/restock_events.csv
+2025-12-04 18:03:27,973 | INFO     | InventoryPipeline | Loaded 28 records from restock_events
+2025-12-04 18:03:27,974 | INFO     | InventoryPipeline | Columns: ['restock_id', 'store_id', 'product_id', 'restock_date', 'incoming_quantity', 'restock_type', 'supplier_id']
+2025-12-04 18:03:27,974 | INFO     | InventoryPipeline | Loading dataset: products from raw/products.csv
+2025-12-04 18:03:27,976 | INFO     | InventoryPipeline | Loaded 10 records from products
+2025-12-04 18:03:27,976 | INFO     | InventoryPipeline | Columns: ['product_id', 'product_name', 'sku', 'category', 'unit_price', 'max_restock_quantity', 'status']
+2025-12-04 18:03:27,976 | INFO     | InventoryPipeline | Loading dataset: stores from raw/stores.csv
+2025-12-04 18:03:27,978 | INFO     | InventoryPipeline | Loaded 5 records from stores
+2025-12-04 18:03:27,978 | INFO     | InventoryPipeline | Columns: ['store_id', 'store_name', 'location', 'city', 'region', 'store_type', 'capacity_tier']
+2025-12-04 18:03:28,011 | INFO     | InventoryPipeline | Raw data saved: raw/inventory_snapshot_raw.parquet
+2025-12-04 18:03:28,016 | INFO     | InventoryPipeline | Raw data saved: raw/restock_events_raw.parquet
+2025-12-04 18:03:28,017 | INFO     | InventoryPipeline | Total inventory snapshots: 30
+2025-12-04 18:03:28,017 | INFO     | InventoryPipeline | Total restock events: 28
+2025-12-04 18:03:28,017 | INFO     | InventoryPipeline | Products in master: 10
+2025-12-04 18:03:28,017 | INFO     | InventoryPipeline | Stores in master: 5
+2025-12-04 18:03:28,019 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 18:03:28,019 | INFO     | InventoryPipeline | LAYER 2: STAGING (SILVER) - Validation & Deduplication
+2025-12-04 18:03:28,019 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 18:03:28,020 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 18:03:28,020 | INFO     | InventoryPipeline | Validating Inventory Snapshots...
+2025-12-04 18:03:28,020 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 18:03:28,023 | INFO     | InventoryPipeline |   Missing store_id: 1 records
+2025-12-04 18:03:28,026 | INFO     | InventoryPipeline |   Missing product_id: 1 records
+2025-12-04 18:03:28,029 | INFO     | InventoryPipeline |   Missing snapshot_date: 1 records
+2025-12-04 18:03:28,032 | INFO     | InventoryPipeline |   Missing snapshot_level: 0 records
+2025-12-04 18:03:28,035 | INFO     | InventoryPipeline |   Negative stock: 1 records
+2025-12-04 18:03:28,038 | INFO     | InventoryPipeline |   Mismatched product_id: 1 records
+2025-12-04 18:03:28,041 | INFO     | InventoryPipeline |   Capacity exceeded (warning): 0 records
+2025-12-04 18:03:28,046 | INFO     | InventoryPipeline |   Valid records: 24
+2025-12-04 18:03:28,047 | INFO     | InventoryPipeline |   Invalid records: 5
+2025-12-04 18:03:28,047 | INFO     | InventoryPipeline |   Duplicates removed: 1
+2025-12-04 18:03:28,047 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 18:03:28,048 | INFO     | InventoryPipeline | Validating Restock Events...
+2025-12-04 18:03:28,048 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 18:03:28,056 | INFO     | InventoryPipeline |   Missing store_id: 1 records
+2025-12-04 18:03:28,061 | INFO     | InventoryPipeline |   Missing product_id: 1 records
+2025-12-04 18:03:28,065 | INFO     | InventoryPipeline |   Missing restock_date: 0 records
+2025-12-04 18:03:28,067 | INFO     | InventoryPipeline |   Missing incoming_quantity: 0 records
+2025-12-04 18:03:28,071 | INFO     | InventoryPipeline |   Invalid quantity: 0 records
+2025-12-04 18:03:28,080 | INFO     | InventoryPipeline |   Exceeded restock max: 3 records
+2025-12-04 18:03:28,083 | INFO     | InventoryPipeline |   Mismatched product_id: 1 records
+2025-12-04 18:03:28,085 | INFO     | InventoryPipeline |   Valid records: 22
+2025-12-04 18:03:28,086 | INFO     | InventoryPipeline |   Invalid records: 6
+2025-12-04 18:03:28,087 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 18:03:28,090 | INFO     | InventoryPipeline | Applying Fuzzy Matching for Product ID Correction...
+2025-12-04 18:03:28,093 | INFO     | InventoryPipeline | --------------------------------------------------
+2025-12-04 18:03:28,096 | INFO     | InventoryPipeline |   Attempting fuzzy match for 1 records in inventory_snapshot
+2025-12-04 18:03:28,110 | INFO     | InventoryPipeline |   Attempting fuzzy match for 1 records in restock_events
+2025-12-04 18:03:28,118 | INFO     | InventoryPipeline |   Fuzzy matches found: 2
+2025-12-04 18:03:28,118 | INFO     | InventoryPipeline |   Unmatched products: 0
+2025-12-04 18:03:28,118 | INFO     | InventoryPipeline |   Validating SKU format with pattern: ^SKU-[A-Z]{3}-[0-9]{3}$
+2025-12-04 18:03:28,120 | INFO     | InventoryPipeline |     inventory_snapshot: 24 non-standard SKUs
+2025-12-04 18:03:28,127 | INFO     | InventoryPipeline |     restock_events: 22 non-standard SKUs
+2025-12-04 18:03:28,145 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 18:03:28,146 | INFO     | InventoryPipeline | LAYER 3: RECONCILIATION - Computing Effective Stock Level
+2025-12-04 18:03:28,147 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 18:03:28,155 | INFO     | InventoryPipeline |   Aggregated restock events: 22 unique combinations
+2025-12-04 18:03:28,171 | INFO     | InventoryPipeline |   Formula: effective_stock = snapshot + restock - damaged - expired
+2025-12-04 18:03:28,174 | INFO     | InventoryPipeline |   Total reconciled records: 24
+2025-12-04 18:03:28,175 | INFO     | InventoryPipeline |   Average effective stock: 353.12
+2025-12-04 18:03:28,176 | INFO     | InventoryPipeline |   Total stock movement: 1120
+2025-12-04 18:03:28,177 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 18:03:28,177 | INFO     | InventoryPipeline | LAYER 4: CURATED (GOLD) - Inventory Fact Table
+2025-12-04 18:03:28,177 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 18:03:28,202 | INFO     | InventoryPipeline |   Saved to: curated/inventory_fact/inventory_fact.parquet
+2025-12-04 18:03:28,208 | INFO     | InventoryPipeline |   Also saved as CSV: curated/inventory_fact/inventory_fact.csv
+2025-12-04 18:03:28,208 | INFO     | InventoryPipeline |   Total records in fact table: 24
+2025-12-04 18:03:28,211 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 18:03:28,211 | INFO     | InventoryPipeline | QUARANTINE LAYER - Invalid Records for Diagnostics
+2025-12-04 18:03:28,211 | INFO     | InventoryPipeline | ======================================================================
+2025-12-04 18:03:28,230 | INFO     | InventoryPipeline |   inventory_snapshot: 5 invalid records saved to quarantine/quarantine_inventory_snapshot
+2025-12-04 18:03:28,247 | INFO     | InventoryPipeline |   restock_events: 6 invalid records saved to quarantine/quarantine_restock_events

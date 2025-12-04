@@ -1,0 +1,281 @@
+# =============================================================================
+# TASK 1: UNIFIED PRODUCT & INVENTORY DATA HARMONIZATION PIPELINE
+# Configuration-Driven Ingestion System
+# =============================================================================
+
+pipeline:
+  name: "inventory_harmonization_pipeline"
+  version: "2.0"
+  description: "Automated pipeline for inventory data harmonization - Single Source of Truth"
+  author: "Hackathon Team"
+
+# =============================================================================
+# DATA SOURCE CONFIGURATIONS (Config-Driven - No Code Changes Needed)
+# =============================================================================
+data_sources:
+  # Inventory Snapshot Dataset
+  inventory_snapshot:
+    file_path: "raw/inventory_snapshot.csv"
+    file_type: "csv"
+    delimiter: ","
+    encoding: "utf-8"
+    required_columns:
+      - "snapshot_id"
+      - "store_id"
+      - "product_id"
+      - "snapshot_date"
+      - "snapshot_level"
+    optional_columns:
+      - "max_capacity"
+      - "damaged_quantity"
+      - "expired_quantity"
+    column_types:
+      snapshot_id: "string"
+      store_id: "string"
+      product_id: "string"
+      snapshot_date: "date"
+      snapshot_level: "integer"
+      max_capacity: "integer"
+      damaged_quantity: "integer"
+      expired_quantity: "integer"
+    date_format: "%Y-%m-%d"
+
+  # Restock Events Dataset
+  restock_events:
+    file_path: "raw/restock_events.csv"
+    file_type: "csv"
+    delimiter: ","
+    encoding: "utf-8"
+    required_columns:
+      - "restock_id"
+      - "store_id"
+      - "product_id"
+      - "restock_date"
+      - "incoming_quantity"
+    optional_columns:
+      - "restock_type"
+      - "supplier_id"
+    column_types:
+      restock_id: "string"
+      store_id: "string"
+      product_id: "string"
+      restock_date: "date"
+      incoming_quantity: "integer"
+      restock_type: "string"
+      supplier_id: "string"
+    date_format: "%Y-%m-%d"
+
+  # Products Master Dataset
+  products:
+    file_path: "raw/products.csv"
+    file_type: "csv"
+    delimiter: ","
+    encoding: "utf-8"
+    required_columns:
+      - "product_id"
+      - "product_name"
+      - "sku"
+    optional_columns:
+      - "category"
+      - "unit_price"
+      - "max_restock_quantity"
+      - "status"
+    column_types:
+      product_id: "string"
+      product_name: "string"
+      sku: "string"
+      category: "string"
+      unit_price: "float"
+      max_restock_quantity: "integer"
+      status: "string"
+
+  # Stores Master Dataset
+  stores:
+    file_path: "raw/stores.csv"
+    file_type: "csv"
+    delimiter: ","
+    encoding: "utf-8"
+    required_columns:
+      - "store_id"
+      - "store_name"
+    optional_columns:
+      - "location"
+      - "city"
+      - "region"
+      - "store_type"
+      - "capacity_tier"
+
+# =============================================================================
+# VALIDATION RULES
+# =============================================================================
+validation:
+  # Inventory Snapshot Validation
+  inventory_snapshot:
+    not_null_fields:
+      - "store_id"
+      - "product_id"
+      - "snapshot_date"
+      - "snapshot_level"
+    
+    business_rules:
+      - name: "negative_stock_check"
+        description: "Snapshot level should not be negative"
+        field: "snapshot_level"
+        condition: ">= 0"
+        severity: "ERROR"
+      
+      - name: "capacity_check"
+        description: "Snapshot level should not exceed max capacity"
+        field: "snapshot_level"
+        condition: "<= max_capacity"
+        severity: "WARNING"
+      
+      - name: "damaged_non_negative"
+        description: "Damaged quantity should not be negative"
+        field: "damaged_quantity"
+        condition: ">= 0"
+        severity: "ERROR"
+      
+      - name: "expired_non_negative"
+        description: "Expired quantity should not be negative"
+        field: "expired_quantity"
+        condition: ">= 0"
+        severity: "ERROR"
+
+  # Restock Events Validation
+  restock_events:
+    not_null_fields:
+      - "store_id"
+      - "product_id"
+      - "restock_date"
+      - "incoming_quantity"
+    
+    business_rules:
+      - name: "restock_quantity_positive"
+        description: "Incoming quantity should be positive"
+        field: "incoming_quantity"
+        condition: "> 0"
+        severity: "ERROR"
+      
+      - name: "restock_logical_max"
+        description: "Restock quantity should not exceed logical max (from products table)"
+        field: "incoming_quantity"
+        reference_field: "max_restock_quantity"
+        condition: "<="
+        severity: "WARNING"
+
+# =============================================================================
+# DEDUPLICATION SETTINGS
+# =============================================================================
+deduplication:
+  inventory_snapshot:
+    key_columns:
+      - "store_id"
+      - "product_id"
+      - "snapshot_date"
+    strategy: "keep_last"
+    order_by: "snapshot_id"
+  
+  restock_events:
+    key_columns:
+      - "store_id"
+      - "product_id"
+      - "restock_date"
+      - "restock_id"
+    strategy: "keep_all"  # Restocks can happen multiple times per day
+
+# =============================================================================
+# RECONCILIATION FORMULA
+# =============================================================================
+reconciliation:
+  # Main formula: effective_stock = snapshot_level + incoming_restock - damaged - expired
+  formula:
+    base_field: "snapshot_level"
+    add_fields:
+      - "incoming_restock"
+    subtract_fields:
+      - "damaged_quantity"
+      - "expired_quantity"
+    output_field: "effective_stock_level"
+  
+  edge_cases:
+    negative_effective_stock:
+      action: "flag"
+      flag_column: "negative_stock_flag"
+      set_to_zero: false
+    
+    exceeded_capacity:
+      action: "flag"
+      flag_column: "capacity_exceeded_flag"
+      default_max_capacity: 10000
+
+# =============================================================================
+# FUZZY MATCHING CONFIGURATION
+# =============================================================================
+fuzzy_matching:
+  enabled: true
+  
+  # Product ID matching
+  product_id_matching:
+    algorithm: "levenshtein"
+    threshold: 85  # Similarity score 0-100
+    reference_table: "products"
+    reference_field: "product_id"
+  
+  # Product Name matching (for missing product_ids)
+  product_name_matching:
+    algorithm: "token_sort_ratio"
+    threshold: 80
+    reference_table: "products"
+    reference_field: "product_name"
+  
+  # SKU Validation
+  sku_validation:
+    enabled: true
+    pattern: "^SKU-[A-Z]{3}-[0-9]{3}$"
+    strict_mode: false
+
+# =============================================================================
+# OUTPUT CONFIGURATIONS
+# =============================================================================
+output:
+  raw:
+    path: "raw"
+    format: "csv"
+  
+  staging:
+    path: "staging"
+    format: "parquet"
+    validated_inventory: "staging/validated_inventory"
+    validated_restock: "staging/validated_restock"
+  
+  curated:
+    path: "curated"
+    format: "parquet"
+    inventory_fact_table: "curated/inventory_fact"
+    also_save_csv: true
+  
+  quarantine:
+    path: "quarantine"
+    format: "parquet"
+    inventory_quarantine: "quarantine/quarantine_inventory"
+    restock_quarantine: "quarantine/quarantine_restock"
+    also_save_csv: true
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+  file: "logs/task1_pipeline.log"
+  console: true
+
+# =============================================================================
+# PIPELINE SETTINGS
+# =============================================================================
+settings:
+  parallel_processing: false
+  batch_size: 10000
+  checkpoint_enabled: true
+  checkpoint_path: "checkpoints/task1"

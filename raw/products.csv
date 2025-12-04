@@ -1,0 +1,12 @@
+product_id,product_name,sku,category,unit_price,max_restock_quantity,status
+PRD001,Organic Whole Milk 1L,SKU-MLK-001,Dairy,45.00,500,ACTIVE
+PRD002,Brown Bread 400g,SKU-BRD-002,Bakery,35.00,300,ACTIVE
+PRD003,Fresh Eggs 12pc,SKU-EGG-003,Dairy,72.00,200,ACTIVE
+PRD004,Basmati Rice 5kg,SKU-RCE-004,Grains,320.00,400,ACTIVE
+PRD005,Olive Oil 1L,SKU-OIL-005,Cooking,550.00,150,ACTIVE
+PRD006,Chicken Breast 500g,SKU-CHK-006,Meat,180.00,250,ACTIVE
+PRD007,Greek Yogurt 400g,SKU-YGT-007,Dairy,85.00,200,ACTIVE
+PRD008,Orange Juice 1L,SKU-JCE-008,Beverages,65.00,300,ACTIVE
+PRD009,Whole Wheat Pasta 500g,SKU-PST-009,Grains,55.00,250,ACTIVE
+PRD010,Cheddar Cheese 200g,SKU-CHS-010,Dairy,120.00,150,ACTIVE
+

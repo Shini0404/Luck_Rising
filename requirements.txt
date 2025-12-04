@@ -1,0 +1,51 @@
+# Task 1-6: Hackathon Data Pipeline Dependencies
+# ==============================================
+
+# Core Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+pyarrow>=14.0.0  # For Parquet support
+
+# Configuration
+pyyaml>=6.0
+
+# Streamlit Dashboard
+streamlit>=1.28.0
+plotly>=5.18.0
+
+# Fuzzy Matching (Task 1)
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.21.0  # Faster fuzzy matching
+
+# Machine Learning (Task 2-6)
+scikit-learn>=1.3.0
+xgboost>=2.0.0
+lightgbm>=4.0.0
+
+# Association Rules (Task 2)
+mlxtend>=0.23.0
+
+# Time Series Forecasting (Task 5, 6)
+prophet>=1.1.0
+statsmodels>=0.14.0
+
+# Anomaly Detection (Task 3)
+# (scikit-learn already covers Isolation Forest)
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Optional: PySpark (for large-scale processing)
+# pyspark>=3.5.0
+
+# Optional: Delta Lake
+# delta-spark>=3.0.0
+
+# Jupyter Notebook support
+jupyter>=1.0.0
+notebook>=7.0.0
+
+# Logging and utilities
+tqdm>=4.65.0
+

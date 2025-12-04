@@ -1,0 +1,77 @@
+
+================================================================================
+          SHOPPING BASKET AFFINITY ANALYSIS - EXECUTION REPORT
+================================================================================
+
+Pipeline: basket_affinity_analyzer
+Version:  1.0
+Executed: 2025-12-04 19:11:10
+
+--------------------------------------------------------------------------------
+                         INPUT DATA STATISTICS
+--------------------------------------------------------------------------------
+
+  Total Transactions:        25
+  Total Line Items:          70
+  Total Products (Master):   10
+  Unique Products in Sales:  7
+
+--------------------------------------------------------------------------------
+                         AFFINITY ANALYSIS RESULTS
+--------------------------------------------------------------------------------
+
+  Total Product Pairs:       69
+  Pairs Above Threshold:     8
+  Top Affinities Returned:   8
+
+--------------------------------------------------------------------------------
+                         THRESHOLDS USED
+--------------------------------------------------------------------------------
+
+  Minimum Support:           0.01
+  Minimum Confidence:        0.1
+  Minimum Lift:              1.0
+
+--------------------------------------------------------------------------------
+                         TOP 10 RECOMMENDATIONS
+--------------------------------------------------------------------------------
+
+
+  #1: Customers who buy Organic Whole Milk 1L also buy Olive Oil 1L
+       Support: 0.2000 | Confidence: 29.41% | Lift: 1.47
+
+  #2: Customers who buy Fresh Eggs 12pc also buy Greek Yogurt 400g
+       Support: 0.1600 | Confidence: 26.67% | Lift: 1.33
+
+  #3: Customers who buy Fresh Eggs 12pc also buy Basmati Rice 5kg
+       Support: 0.1600 | Confidence: 26.67% | Lift: 1.33
+
+  #4: Customers who buy Brown Bread 400g also buy Orange Juice 1L
+       Support: 0.1600 | Confidence: 21.05% | Lift: 1.32
+
+  #5: Customers who buy Organic Whole Milk 1L also buy Basmati Rice 5kg
+       Support: 0.1600 | Confidence: 23.53% | Lift: 1.18
+
+  #6: Customers who buy Organic Whole Milk 1L also buy Fresh Eggs 12pc
+       Support: 0.4400 | Confidence: 64.71% | Lift: 1.08
+
+  #7: Customers who buy Brown Bread 400g also buy Basmati Rice 5kg
+       Support: 0.1600 | Confidence: 21.05% | Lift: 1.05
+
+  #8: Customers who buy Organic Whole Milk 1L also buy Brown Bread 400g
+       Support: 0.5200 | Confidence: 76.47% | Lift: 1.01
+
+--------------------------------------------------------------------------------
+                         OUTPUT LOCATIONS
+--------------------------------------------------------------------------------
+
+  Affinity Scores:   curated/task2/affinity_scores/
+  Top Affinities:    curated/task2/top_affinities/
+
+--------------------------------------------------------------------------------
+                         EXECUTION TIME
+--------------------------------------------------------------------------------
+
+  Total Time:        0.09 seconds
+
+================================================================================

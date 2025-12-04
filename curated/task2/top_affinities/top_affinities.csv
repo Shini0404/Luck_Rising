@@ -1,0 +1,9 @@
+rank,product_a,product_a_name,product_b,product_b_name,support,confidence_a_to_b,lift,pair_count,recommendation
+1,PRD001,Organic Whole Milk 1L,PRD005,Olive Oil 1L,0.2,0.2941,1.4706,5,Customers who buy Organic Whole Milk 1L also buy Olive Oil 1L
+2,PRD003,Fresh Eggs 12pc,PRD007,Greek Yogurt 400g,0.16,0.2667,1.3333,4,Customers who buy Fresh Eggs 12pc also buy Greek Yogurt 400g
+3,PRD003,Fresh Eggs 12pc,PRD004,Basmati Rice 5kg,0.16,0.2667,1.3333,4,Customers who buy Fresh Eggs 12pc also buy Basmati Rice 5kg
+4,PRD002,Brown Bread 400g,PRD008,Orange Juice 1L,0.16,0.2105,1.3158,4,Customers who buy Brown Bread 400g also buy Orange Juice 1L
+5,PRD001,Organic Whole Milk 1L,PRD004,Basmati Rice 5kg,0.16,0.2353,1.1765,4,Customers who buy Organic Whole Milk 1L also buy Basmati Rice 5kg
+6,PRD001,Organic Whole Milk 1L,PRD003,Fresh Eggs 12pc,0.44,0.6471,1.0784,11,Customers who buy Organic Whole Milk 1L also buy Fresh Eggs 12pc
+7,PRD002,Brown Bread 400g,PRD004,Basmati Rice 5kg,0.16,0.2105,1.0526,4,Customers who buy Brown Bread 400g also buy Basmati Rice 5kg
+8,PRD001,Organic Whole Milk 1L,PRD002,Brown Bread 400g,0.52,0.7647,1.0062,13,Customers who buy Organic Whole Milk 1L also buy Brown Bread 400g
