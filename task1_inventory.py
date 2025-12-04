@@ -1,4 +1,190 @@
+"""
+Task 1: Unified Product & Inventory Data Harmonization Pipeline
+================================================================
+This pipeline ingests, validates, reconciles, and curates inventory data
+into a unified single source of truth.
 
+
+"""
+
+import pandas as pd
+import numpy as np
+import yaml
+import logging
+import os
+from datetime import datetime
+from pathlib import Path
+from fuzzywuzzy import fuzz
+from typing import Dict, List, Tuple, Optional
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(_name_)
+
+
+class InventoryPipeline:
+    """
+    Main pipeline class for inventory data harmonization.
+    Implements RAW -> STAGING -> CURATED data flow with validation and reconciliation.
+    """
+    
+    def _init_(self, config_path: str = "config/task1_config.yml"):
+        """Initialize pipeline with configuration."""
+        self.config = self._load_config(config_path)
+        self.raw_data = None
+        self.validated_data = None
+        self.curated_data = None
+        self.quarantine_data = None
+        
+        # Statistics tracking
+        self.stats = {
+            'total_records': 0,
+            'valid_records': 0,
+            'invalid_records': 0,
+            'duplicates_removed': 0,
+            'negative_stock_flags': 0,
+            'capacity_exceeded_flags': 0
+        }
+        
+    def _load_config(self, config_path: str) -> Dict:
+        """Load configuration from YAML file."""
+        try:
+            with open(config_path, 'r') as f:
+                config = yaml.safe_load(f)
+            logger.info(f"Configuration loaded from {config_path}")
+            return config
+        except Exception as e:
+            logger.error(f"Failed to load configuration: {e}")
+            raise
+    
+    # =========================================================================
+    # LAYER 1: RAW (BRONZE) - Data Ingestion
+    # =========================================================================
+    
+    def ingest_raw_data(self, file_path: str = None) -> pd.DataFrame:
+        """
+        Ingest raw data from CSV file into RAW layer.
+        No transformations - data stored as-is.
+        """
+        logger.info("=" * 60)
+        logger.info("LAYER 1: RAW (BRONZE) - Data Ingestion")
+        logger.info("=" * 60)
+        
+        if file_path is None:
+            file_path = self.config['data_sources']['inventory_data']['file_path']
+        
+        try:
+            # Read CSV with specified settings
+            self.raw_data = pd.read_csv(
+                file_path,
+                delimiter=self.config['data_sources']['inventory_data'].get('delimiter', ','),
+                encoding=self.config['data_sources']['inventory_data'].get('encoding', 'utf-8')
+            )
+            
+            self.stats['total_records'] = len(self.raw_data)
+            logger.info(f"Ingested {self.stats['total_records']} records from {file_path}")
+            logger.info(f"Columns: {list(self.raw_data.columns)}")
+            
+            # Save raw data to RAW layer
+            raw_output_path = "raw/inventory_raw.parquet"
+            self.raw_data.to_parquet(raw_output_path, index=False)
+            logger.info(f"Raw data saved to {raw_output_path}")
+            
+            return self.raw_data
+            
+        except Exception as e:
+            logger.error(f"Failed to ingest data: {e}")
+            raise
+    
+    # =========================================================================
+    # LAYER 2: STAGING (SILVER) - Validation & Deduplication
+    # =========================================================================
+    
+    def validate_data(self, df: pd.DataFrame = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Validate data according to configuration rules.
+        Returns: (valid_df, invalid_df)
+        """
+        logger.info("=" * 60)
+        logger.info("LAYER 2: STAGING (SILVER) - Validation")
+        logger.info("=" * 60)
+        
+        if df is None:
+            df = self.raw_data.copy()
+        
+        # Initialize validation flags
+        df['validation_status'] = 'VALID'
+        df['validation_errors'] = ''
+        
+        # Check required fields (not null)
+        required_columns = self.config['data_sources']['inventory_data']['required_columns']
+        
+        for col in required_columns:
+            if col in df.columns:
+                null_mask = df[col].isna() | (df[col] == '')
+                df.loc[null_mask, 'validation_status'] = 'INVALID'
+                df.loc[null_mask, 'validation_errors'] += f'Missing {col}; '
+                logger.info(f"Column '{col}': {null_mask.sum()} null values found")
+        
+        # Validate inventory level (non-negative)
+        if 'Inventory_Level' in df.columns:
+            negative_mask = df['Inventory_Level'] < 0
+            df.loc[negative_mask, 'validation_status'] = 'INVALID'
+            df.loc[negative_mask, 'validation_errors'] += 'Negative inventory; '
+            logger.info(f"Negative inventory records: {negative_mask.sum()}")
+        
+        # Validate units sold (non-negative)
+        if 'Units_Sold' in df.columns:
+            negative_sold_mask = df['Units_Sold'] < 0
+            df.loc[negative_sold_mask, 'validation_status'] = 'INVALID'
+            df.loc[negative_sold_mask, 'validation_errors'] += 'Negative units sold; '
+            logger.info(f"Negative units sold records: {negative_sold_mask.sum()}")
+        
+        # Validate price (positive)
+        if 'Price' in df.columns:
+            price_mask = df['Price'] <= 0
+            df.loc[price_mask, 'validation_status'] = 'INVALID'
+            df.loc[price_mask, 'validation_errors'] += 'Invalid price; '
+            logger.info(f"Invalid price records: {price_mask.sum()}")
+        
+        # Split into valid and invalid
+        valid_df = df[df['validation_status'] == 'VALID'].copy()
+        invalid_df = df[df['validation_status'] == 'INVALID'].copy()
+        
+        self.stats['valid_records'] = len(valid_df)
+        self.stats['invalid_records'] = len(invalid_df)
+        
+        logger.info(f"Validation complete: {len(valid_df)} valid, {len(invalid_df)} invalid")
+        
+        return valid_df, invalid_df
+    
+    def deduplicate_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Remove duplicate records based on key columns.
+        Keeps the last record (most recent).
+        """
+        logger.info("-" * 40)
+        logger.info("Deduplication Process")
+        logger.info("-" * 40)
+        
+        key_columns = self.config['deduplication']['key_columns']
+        initial_count = len(df)
+        
+        # Sort by date and keep last
+        if 'Date' in df.columns:
+            df = df.sort_values('Date')
+        
+        # Remove duplicates
+        df_deduped = df.drop_duplicates(subset=key_columns, keep='last')
+        
+        self.stats['duplicates_removed'] = initial_count - len(df_deduped)
+        logger.info(f"Removed {self.stats['duplicates_removed']} duplicate records")
+        logger.info(f"Records after deduplication: {len(df_deduped)}")
+        
+        return df_deduped
 # =========================================================================
     # LAYER 3: RECONCILIATION ENGINE
     # =========================================================================
