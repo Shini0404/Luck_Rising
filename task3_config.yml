@@ -1,0 +1,156 @@
+# =============================================================================
+# TASK 3: REFUND & FRAUD DETECTION ENGINE
+# Configuration File
+# =============================================================================
+
+pipeline:
+  name: "refund_fraud_detection_engine"
+  version: "1.0"
+  description: "Detect suspicious refund activities using sales, refund logs, and customer behaviors"
+
+# =============================================================================
+# DATA SOURCES
+# =============================================================================
+data_sources:
+  refund_transactions:
+    file_path: "raw/refund_transactions.csv"
+    file_type: "csv"
+    required_columns:
+      - "refund_id"
+      - "original_transaction_id"
+      - "customer_id"
+      - "refund_date"
+      - "refund_amount"
+      - "original_amount"
+
+  store_sales_header:
+    file_path: "raw/store_sales_header.csv"
+    file_type: "csv"
+    required_columns:
+      - "transaction_id"
+      - "customer_id"
+      - "sale_date"
+      - "total_amount"
+
+  store_sales_line_items:
+    file_path: "raw/store_sales_line_items.csv"
+    file_type: "csv"
+
+  customer_details:
+    file_path: "raw/customer_details.csv"
+    file_type: "csv"
+    required_columns:
+      - "customer_id"
+      - "customer_name"
+
+  products:
+    file_path: "raw/products.csv"
+    file_type: "csv"
+
+# =============================================================================
+# VALIDATION RULES
+# =============================================================================
+validation:
+  # Refund cannot exceed original amount
+  max_refund_ratio: 1.0  # refund_amount / original_amount <= 1.0
+  
+  # Refund window (days from original purchase)
+  allowed_refund_window_days: 30
+  
+  # Must match customer_id from original transaction
+  require_customer_match: true
+  
+  # Must match payment_mode from original transaction
+  require_payment_mode_match: true
+
+# =============================================================================
+# FRAUD DETECTION RULES
+# =============================================================================
+fraud_detection:
+  # High-Frequency Refunds
+  high_frequency:
+    # Max refunds per customer within time window
+    max_refunds_per_window: 3
+    window_days: 30
+    severity: "HIGH"
+  
+  # High-Value Refunds
+  high_value:
+    # Refund amount threshold
+    amount_threshold: 300.00
+    severity: "MEDIUM"
+  
+  # High-Value Frequent Refunds (combination)
+  high_value_frequent:
+    min_refunds: 2
+    min_total_amount: 500.00
+    window_days: 30
+    severity: "CRITICAL"
+  
+  # Same Product Refunded Repeatedly
+  repeat_product:
+    max_same_product_refunds: 2
+    window_days: 60
+    severity: "HIGH"
+  
+  # Payment Mode Mismatch
+  payment_mismatch:
+    enabled: true
+    severity: "MEDIUM"
+  
+  # Refund Amount Exceeds Original
+  amount_exceeded:
+    enabled: true
+    severity: "CRITICAL"
+  
+  # Refund Outside Window
+  outside_window:
+    enabled: true
+    severity: "MEDIUM"
+
+# =============================================================================
+# ANOMALY DETECTION (Statistical)
+# =============================================================================
+anomaly_detection:
+  enabled: true
+  
+  # Z-Score method
+  zscore:
+    enabled: true
+    threshold: 2.0  # |z-score| > 2.0 is anomaly
+  
+  # IQR method
+  iqr:
+    enabled: true
+    multiplier: 1.5  # Q1 - 1.5*IQR to Q3 + 1.5*IQR
+  
+  # Historical refund ratio
+  refund_ratio:
+    enabled: true
+    max_ratio: 0.30  # refunds/purchases > 30% is suspicious
+
+# =============================================================================
+# OUTPUT CONFIGURATIONS
+# =============================================================================
+output:
+  staging:
+    path: "staging/task3"
+    validated_refunds: "staging/task3/validated_refunds"
+    enriched_refunds: "staging/task3/enriched_refunds"
+  
+  curated:
+    path: "curated/task3"
+    fraud_flags: "curated/task3/fraud_flags"
+    suspicious_customers: "curated/task3/suspicious_customers"
+    clean_refunds: "curated/task3/clean_refunds"
+    also_save_csv: true
+
+# =============================================================================
+# LOGGING
+# =============================================================================
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-8s | %(message)s"
+  file: "logs/task3_pipeline.log"
+  console: true
+
